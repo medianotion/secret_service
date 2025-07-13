@@ -12,6 +12,9 @@ namespace Security.Extensions
         // Configuration from appsettings.json
         public static IServiceCollection AddSecretService(this IServiceCollection services, IConfiguration configuration, string sectionName = SecretServiceOptions.SectionName)
         {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+            
             services.Configure<SecretServiceOptions>(configuration.GetSection(sectionName));
             services.AddSingleton<ISecretServiceProvider>(provider =>
             {
@@ -30,6 +33,9 @@ namespace Security.Extensions
         // Manual configuration with action
         public static IServiceCollection AddSecretService(this IServiceCollection services, Action<SecretServiceOptions> configureOptions)
         {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+            if (configureOptions == null) throw new ArgumentNullException(nameof(configureOptions));
+            
             var options = new SecretServiceOptions();
             configureOptions(options);
             return services.AddSecretService(options);
@@ -38,6 +44,9 @@ namespace Security.Extensions
         // Manual configuration with options object
         public static IServiceCollection AddSecretService(this IServiceCollection services, SecretServiceOptions options)
         {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            
             services.AddSingleton<ISecretServiceProvider>(_ => CreateProvider(options));
             services.AddSingleton<ISecrets>(provider =>
             {
@@ -54,7 +63,7 @@ namespace Security.Extensions
             {
                 "SecretsManager" => new SecretsManagerProvider(options.SecretsManager),
                 "ParamStore" => new ParamStoreProvider(options.ParamStore),
-                _ => new ParamStoreProvider(options.ParamStore) // Default to ParamStore
+                _ => throw new NotSupportedException($"Provider '{options.DefaultProvider}' is not supported")
             };
         }
     }
